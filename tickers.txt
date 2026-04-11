@@ -1,0 +1,53 @@
+# Indian Equities (.NS = NSE)
+# --- IT ---
+TCS.NS
+INFY.NS
+WIPRO.NS
+HCLTECH.NS
+TECHM.NS
+# --- Banking & Finance ---
+HDFCBANK.NS
+ICICIBANK.NS
+KOTAKBANK.NS
+AXISBANK.NS
+SBIN.NS
+# --- Energy ---
+RELIANCE.NS
+ONGC.NS
+NTPC.NS
+POWERGRID.NS
+# --- FMCG ---
+HINDUNILVR.NS
+ITC.NS
+NESTLEIND.NS
+# --- Auto ---
+MARUTI.NS
+TATAMOTORS.NS
+BAJAJ-AUTO.NS
+# --- Pharma ---
+SUNPHARMA.NS
+DRREDDY.NS
+CIPLA.NS
+# --- Metals ---
+TATASTEEL.NS
+JSWSTEEL.NS
+
+# US Equities
+# --- Tech ---
+AAPL
+MSFT
+NVDA
+GOOGL
+META
+# --- EV / Auto ---
+TSLA
+# --- Finance ---
+JPM
+BAC
+GS
+# --- Healthcare ---
+JNJ
+PFE
+# --- Energy ---
+XOM
+CVX
