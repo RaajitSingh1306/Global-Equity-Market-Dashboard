@@ -117,9 +117,12 @@ streamlit run dashboard_streamlit.py
 ```
 
 ---
+## Frontend
 
-Power BI dashboard (dashboard.pbix) not tracked. Run streamlit run dashboard_streamlit.py for the interactive fallback.
+Interactive dashboard built in **Streamlit + Plotly**. A Power BI prototype exists 
+locally but is not hosted — Streamlit is the deployed interface.
 
+**Live**: [global-equity-market-dashboard.streamlit.app](https://global-equity-market-dashboard.streamlit.app/)
 ---
 
 ## Data Disclaimer
