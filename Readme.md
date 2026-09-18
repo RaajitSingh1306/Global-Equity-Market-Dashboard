@@ -1,133 +1,209 @@
-# P4 — Global Equity Market Dashboard
+# Global Equity Market Heatmap & Risk-Return Dashboard
 
-Interactive dashboard visualising **35 Indian and US equities** across 10 sectors using a sector-wise heatmap combined with risk-return analytics.  
-Data is fetched live from Yahoo Finance; KPIs are computed from 3 years of daily prices and served via two frontends: Power BI (primary) and Streamlit (fallback).
+[![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-Interactive%20Web%20App-red)](#streamlit-dashboard-web)
+[![Power BI](https://img.shields.io/badge/Power%20BI-dashboard.pbix-yellow)](#power-bi-dashboard-desktop)
+[![Data Pipeline](https://img.shields.io/badge/Data-Yahoo%20Finance%20Live-blue)](#architecture)
+[![Coverage](https://img.shields.io/badge/Universe-35%20Equities%20(IN%20%2B%20US)-green)](#coverage)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+An institutional-grade interactive market monitoring system that visualizes **35 Indian (NSE) and US equities** across 10 sectors using hierarchical heatmaps combined with multi-year risk-return analytics.
 
-## Architecture
-
-```
-tickers.txt  (35 symbols)
-      │
-fetch_data.py
-      ├── yfinance .info     →  live snapshot  (price, change %, market cap)
-      └── yfinance .history  →  3yr daily OHLCV  →  CAGR, Sharpe, Max Drawdown
-      │
-data/heatmap_data.csv
-      ├── dashboard.pbix              ← Power BI  (primary)
-      └── dashboard_streamlit.py      ← Streamlit (fallback)
-```
+The system connects directly to Yahoo Finance to fetch live intraday pricing and 3-year daily OHLCV history, computes key performance metrics (CAGR, Annualized Sharpe Ratio, Maximum Drawdown, Liquidity), and serves the analytics via two frontends: a **Streamlit Web Application** with Plotly visualizations and a native **Power BI Desktop Report** (`.pbix`).
 
 ---
 
-## KPIs
+## Table of Contents
 
-| KPI | Formula | Notes |
+1. [What This Project Does](#what-this-project-does)
+2. [Why It Was Built](#why-it-was-built)
+3. [Architecture & Data Flow](#architecture--data-flow)
+4. [Coverage & Universe](#coverage--universe)
+5. [KPIs & Formulations](#kpis--formulations)
+6. [Project Structure](#project-structure)
+7. [Where & How to Start](#where--how-to-start)
+   - [Step 1: Environment Setup](#step-1-environment-setup)
+   - [Step 2: Generate Dataset](#step-2-generate-dataset)
+   - [Step 3A: Launch Streamlit Web Dashboard](#step-3a-launch-streamlit-web-dashboard)
+   - [Step 3B: Open Power BI Dashboard](#step-3b-open-power-bi-dashboard)
+8. [Dashboard Capabilities](#dashboard-capabilities)
+9. [Connected Portfolio Projects](#connected-portfolio-projects)
+
+---
+
+## What This Project Does
+
+Given a diversified basket of cross-border equities, the system:
+
+1. **Ingests Cross-Market Data**: Reads symbols from `tickers.txt` and queries Yahoo Finance (`yfinance`) for both real-time intraday quotes (last price, change %, market cap) and 3-year daily trading histories.
+2. **Computes Institutional Risk-Return Metrics**:
+   - **CAGR** over a rolling 3-year investment horizon.
+   - **Annualized Sharpe Ratio** ($R_f = 6.5\%$ standard benchmark).
+   - **Maximum Peak-to-Trough Drawdown**.
+   - **30-Day Average Volume** as an institutional liquidity indicator.
+3. **Persists Formatted Analytics**: Normalizes Indian (`.NS`) and US equities into a structured schema at `data/heatmap_data.csv`.
+4. **Delivers Dual-Frontend Visualization**:
+   - **Streamlit Web App**: Real-time cross-filtering, interactive Plotly treemaps by sector and country, risk-return scatter plots, and sorted data tables.
+   - **Power BI Report (`dashboard.pbix`)**: Executive dashboard layout with slicers, sector cards, and visual drill-downs.
+
+---
+
+## Why It Was Built
+
+* **Cross-Border Monitoring**: Enables simultaneous comparison between high-growth Indian emerging market leaders and mature US mega-cap technology and industrial titans.
+* **Beyond Pure Price Changes**: Standard financial news heatmaps only show today's 1-day percentage fluctuation, hiding underlying structural risk. This dashboard layers 3-year risk-adjusted returns (Sharpe ratio) and downside vulnerability (Max Drawdown) directly onto the visualization.
+* **Multi-Modal Consumption**: Provides an accessible Python web dashboard for immediate browser viewing and an enterprise `.pbix` model for corporate business intelligence environments.
+
+---
+
+## Architecture & Data Flow
+
+```text
+tickers.txt (35 Indian & US symbols)
+      │
+      ▼
+main.py / fetch_data.py
+      ├── yfinance .info     ──► Live snapshot (Price, Change %, Market Cap)
+      └── yfinance .history  ──► 3-Year Daily OHLCV (CAGR, Sharpe, Max Drawdown)
+      │
+      ▼
+data/heatmap_data.csv (Clean unified dataset)
+      │
+      ├───────────────────────────────┐
+      ▼                               ▼
+Streamlit Web App (Port 8501)    Power BI Desktop (.pbix)
+dashboard_streamlit.py           dashboard.pbix
+• Plotly Sector Treemaps         • Institutional KPI Cards
+• Risk-Return Scatter Matrix     • Interactive Sector Slicers
+• Multi-Asset Data Table         • Drill-Through Visuals
+```
+
+---
+
+## Coverage & Universe
+
+The universe tracks 35 industry-leading blue chips across 10 major economic sectors:
+
+### Indian Equities (NSE: 25 Stocks)
+* **IT & Technology**: TCS, Infosys (`INFY`), Wipro (`WIPRO`), HCL Tech (`HCLTECH`), Tech Mahindra (`TECHM`)
+* **Banking & Finance**: HDFC Bank (`HDFCBANK`), ICICI Bank (`ICICIBANK`), Kotak Mahindra (`KOTAKBANK`), Axis Bank (`AXISBANK`), State Bank of India (`SBIN`)
+* **Energy & Utilities**: Reliance Industries (`RELIANCE`), ONGC (`ONGC`), NTPC (`NTPC`), Power Grid (`POWERGRID`)
+* **Consumer Staples**: Hindustan Unilever (`HINDUNILVR`), ITC (`ITC`), Nestle India (`NESTLEIND`)
+* **Automotive**: Maruti Suzuki (`MARUTI`), Tata Motors (`TATAMOTORS`), Bajaj Auto (`BAJAJ-AUTO`)
+* **Healthcare & Pharma**: Sun Pharma (`SUNPHARMA`), Dr. Reddy's (`DRREDDY`), Cipla (`CIPLA`)
+* **Metals & Mining**: Tata Steel (`TATASTEEL`), JSW Steel (`JSWSTEEL`)
+
+### US Equities (10 Stocks)
+* **Technology**: Apple (`AAPL`), Microsoft (`MSFT`), NVIDIA (`NVDA`), Alphabet (`GOOGL`), Meta (`META`)
+* **Automotive**: Tesla (`TSLA`)
+* **Financial Services**: JPMorgan Chase (`JPM`), Bank of America (`BAC`), Goldman Sachs (`GS`)
+* **Healthcare**: Johnson & Johnson (`JNJ`), Pfizer (`PFE`)
+* **Energy**: ExxonMobil (`XOM`), Chevron (`CVX`)
+
+---
+
+## KPIs & Formulations
+
+| KPI | Formula | Description |
 |---|---|---|
-| CAGR | `(P_end / P_start)^(1/years) − 1` | 3-year window |
-| Sharpe Ratio | `(mean(log_ret) − Rf/252) / std(log_ret) × √252` | Rf = 6.5% (India 10yr G-Sec) |
-| Max Drawdown | `min((equity − cummax) / cummax)` | Worst peak-to-trough % |
-| Avg Vol 30d | Mean of last 30 days' daily volume | Liquidity proxy |
+| **CAGR** | $(P_{\text{end}} / P_{\text{start}})^{1/3} - 1$ | 3-year compound annual growth rate |
+| **Sharpe Ratio** | $\frac{\text{mean}(r_{\text{log}}) - R_f/252}{\text{std}(r_{\text{log}})} \times \sqrt{252}$ | Risk-adjusted return with $R_f = 6.5\%$ |
+| **Max Drawdown** | $\min \left(\frac{P_t - \max_{\tau \le t} P_\tau}{\max_{\tau \le t} P_\tau}\right)$ | Maximum peak-to-trough capital decline over 3 years |
+| **Avg Vol (30d)** | $\frac{1}{30} \sum_{i=1}^{30} \text{Volume}_i$ | 30-day average daily share volume (liquidity gauge) |
 
 ---
 
-## Dataset Columns
+## Project Structure
 
-| Column | Description |
-|---|---|
-| Ticker | Short symbol (no exchange suffix) |
-| Name | Full company name |
-| Sector | Industry classification (yfinance) |
-| Country | India / United States |
-| MarketCap | Market capitalisation (USD) |
-| CurrentPrice | Last traded price |
-| ChangePct | Daily % price change |
-| CAGR | 3-year compound annual growth rate (%) |
-| Sharpe | 3-year annualised Sharpe ratio |
-| Max_Drawdown | Worst drawdown % over 3 years |
-| Avg_Vol_30d | 30-day average daily volume |
-
----
-
-## Coverage
-
-**Indian equities (NSE):** TCS, Infosys, Wipro, HCLTech, TechM, HDFC Bank, ICICI Bank, Kotak, Axis, SBI, Reliance, ONGC, NTPC, PowerGrid, HUL, ITC, Nestle, Maruti, Tata Motors, Bajaj Auto, Sun Pharma, Dr Reddy's, Cipla, Tata Steel, JSW Steel
-
-**US equities:** AAPL, MSFT, NVDA, GOOGL, META, TSLA, JPM, BAC, GS, JNJ, PFE, XOM, CVX
+```text
+Global Market HeatMap/
+├── main.py                 # Pipeline trigger script
+├── fetch_data.py           # Core ingestion & KPI computation engine
+├── dashboard_streamlit.py  # Interactive Streamlit + Plotly web frontend
+├── dashboard.pbix          # Power BI Desktop report
+├── tickers.txt             # 35 configured asset symbols
+├── how to run.txt          # Quick execution notes
+├── requirements.txt        # Python dependencies (yfinance, streamlit, plotly)
+├── Readme.md               # Project documentation
+└── data/
+    └── heatmap_data.csv    # Generated analytics dataset
+```
 
 ---
 
-## Dashboard Features
+## Where & How to Start
 
-### Power BI (`dashboard.pbix`)
-- Treemap: tile size = Market Cap, colour = daily % change (red/green)
-- Risk-return scatter: X = Max Drawdown, Y = CAGR, bubble = Sharpe
-- KPI cards: Avg CAGR, Avg Sharpe, Max Drawdown, top stock
-- Slicers: Sector, Country
+### Step 1: Environment Setup
 
-### Streamlit (`dashboard_streamlit.py`)
-- Sector heatmap treemap (Plotly)
-- Risk-return scatter with country grouping
-- 5 live KPI cards
-- Avg CAGR and Avg Sharpe bar charts by sector
-- Colour-graded sortable data table
-- Sidebar filters: Country, Sector, Market Cap floor
-- Refresh button (clears cache, re-fetches CSV)
-
----
-
-## Setup
+Navigate to the project directory and set up a virtual environment:
 
 ```bash
+cd "Global Market HeatMap"
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+.\venv\Scripts\Activate.ps1
+# Linux / macOS:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
----
+### Step 2: Generate Dataset
 
-## Usage
+Execute the pipeline to query Yahoo Finance and write `data/heatmap_data.csv`:
 
 ```bash
-# Fetch live data and open Power BI
 python main.py
+# or
+python fetch_data.py
+```
 
-# Fetch only (no Power BI, useful on Linux/CI)
-python main.py --no-pbix
+*The script fetches live snapshots and 3-year daily price history for all 35 tickers, prints progress logs, and saves the consolidated CSV.*
 
-# Streamlit fallback dashboard
+### Step 3A: Launch Streamlit Web Dashboard
+
+Start the local web server:
+
+```bash
 streamlit run dashboard_streamlit.py
 ```
 
----
+* Access the interactive dashboard in your browser at: **`http://localhost:8501`**
+* Filter by Country (All, India, United States)
+* Select Sector drill-downs
+* Switch metric views: Daily Change %, 3-Year CAGR, Sharpe Ratio, or Max Drawdown
 
-## File Structure
+### Step 3B: Open Power BI Dashboard
 
-```
-04_market_heatmap/
-├── fetch_data.py           ← data pipeline + KPI computation
-├── main.py                 ← CLI entry point
-├── dashboard_streamlit.py  ← Streamlit fallback dashboard
-├── dashboard.pbix          ← Power BI dashboard
-├── tickers.txt             ← 35 symbols (Indian + US)
-├── requirements.txt
-├── LICENSE
-├── .gitignore
-└── data/                   ← generated (git-ignored)
-    └── heatmap_data.csv
-```
+1. Launch **Power BI Desktop**.
+2. Open `dashboard.pbix`.
+3. To refresh the data with newly generated numbers:
+   - Click **Home** → **Refresh Data** (Power BI points to `data/heatmap_data.csv`).
+4. Interact with slicers, cross-filtering, and dynamic KPI cards.
 
 ---
-## Frontend
 
-Interactive dashboard built in **Streamlit + Plotly**. A Power BI prototype exists 
-locally but is not hosted — Streamlit is the deployed interface.
+## Dashboard Capabilities
 
-**Live**: [global-equity-market-dashboard.streamlit.app](https://global-equity-market-dashboard.streamlit.app/)
----
-
-## Data Disclaimer
-
-Market data is sourced from Yahoo Finance via [yfinance](https://github.com/ranaroussi/yfinance).  
-This project is for educational and portfolio demonstration purposes only and does not constitute financial advice.
+* **Market Treemap**: Tile sizes mapped to Market Capitalization; colors dynamically graded from negative red to positive green based on selected KPI (Daily Change, CAGR, or Sharpe).
+* **Risk vs. Return Matrix**: Scatter plot plotting 3-Year Volatility / Max Drawdown against CAGR, instantly separating high-alpha performers from high-risk laggards.
+* **Top Movers Bar Charts**: Rapid ranking of the day's biggest gainers and losers across both geographies.
+* **Tabular Screener**: Searchable, downloadable table of all 35 assets with formatted currency and percentage indicators.
 
 ---
+
+## Connected Portfolio Projects
+
+* **[Finance KPI](https://github.com/RaajitSingh1306/Finance_Kpi)**: Deep-dive single-ticker 4-panel diagnostic equity generator.
+* **[Nifty Sector Rotation](https://github.com/RaajitSingh1306/Nifty-Sector-Rotation)**: Dynamic momentum allocation across Indian sector indices.
+* **[Volatility Intelligence Platform](https://github.com/RaajitSingh1306/volatility-intelligence-platform)**: Advanced volatility forecasting with econometric GARCH and machine learning.
+
+---
+
+## License & Disclaimer
+
+MIT License. For educational research and market monitoring only. Not investment advice.
