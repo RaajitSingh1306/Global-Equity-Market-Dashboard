@@ -112,6 +112,16 @@ The universe tracks 35 industry-leading blue chips across 10 major economic sect
 
 ---
 
+## Key Design Decisions
+
+- **3-Year Lookback Window**: 3 full years captures complete business cycle phases (expansion, tightening, recovery) while maintaining recency for contemporary market conditions.
+- **Dual Visual Frontend Strategy**: Streamlit with interactive Plotly provides an instant Python-native browser dashboard; Power BI (`dashboard.pbix`) enables enterprise BI users to perform slicer slicing, drill-down, and corporate reporting.
+- **Decoupled Flat-File Architecture**: Configured ticker universe is defined in a plain `tickers.txt` text file, and materialized to `data/heatmap_data.csv`. This avoids database overhead while allowing instant universe additions.
+- **Consistent Log Returns for Sharpe**: Logarithmic daily returns are used for annualization ($\text{std}(r_{\text{log}}) \times \sqrt{252}$), maintaining analytical consistency with the `Finance KPI` engine.
+- **Lightweight Snapshot Ingestion**: Uses `yfinance` `.info` and historical batch downloads rather than persistent paid streaming feeds (Bloomberg, Refinitiv) to keep the project completely open-source and free to run.
+
+---
+
 ## Project Structure
 
 ```text
@@ -196,11 +206,46 @@ streamlit run dashboard_streamlit.py
 
 ---
 
+## Results
+
+Empirical distributions materialized across the 37 active global assets in `data/heatmap_data.csv`:
+
+- **Daily Return Performance**: Range spans from **-3.62%** (Sun Pharma) to **+3.17%** (ICICI Bank) and **+3.12%** (Bajaj Auto).
+- **3-Year Compound Growth (CAGR)**:
+  - Mega-cap US Tech leaders: **+91.32%** (Nvidia), **+45.02%** (Alphabet), **+43.93%** (Meta).
+  - Indian Banking & Industrial leaders: **+37.86%** (Bajaj Auto), **+29.55%** (State Bank of India), **+29.12%** (Tata Steel).
+  - Laggards / Structural headwind assets: **-8.30%** (Pfizer), **-5.71%** (TCS), **-3.54%** (Hindustan Unilever).
+- **Risk-Adjusted Sharpe Ratio ($R_f = 6.5\%$)**:
+  - Highest risk-adjusted performers: **1.21** (Nvidia), **1.10** (JPMorgan Chase), **1.09** (Goldman Sachs), **1.05** (Alphabet), **1.02** (Bajaj Auto).
+  - Negative Sharpe performers: **-0.62** (Pfizer), **-0.60** (TCS), **-0.54** (Hindustan Unilever), **-0.53** (ITC).
+- **Peak-to-Trough Maximum Drawdowns**:
+  - Defensive staples and diversified industrials: **-15.56%** (JSW Steel), **-16.27%** (Johnson & Johnson), **-19.17%** (ICICI Bank).
+  - High-beta / volatile growth leaders: **-57.60%** (Tesla), **-47.26%** (TCS), **-45.04%** (Pfizer), **-41.14%** (Nvidia).
+
+---
+
 ## Connected Portfolio Projects
 
 * **[Finance KPI](https://github.com/RaajitSingh1306/Finance_Kpi)**: Deep-dive single-ticker 4-panel diagnostic equity generator.
 * **[Nifty Sector Rotation](https://github.com/RaajitSingh1306/Nifty-Sector-Rotation)**: Dynamic momentum allocation across Indian sector indices.
 * **[Volatility Intelligence Platform](https://github.com/RaajitSingh1306/volatility-intelligence-platform)**: Advanced volatility forecasting with econometric GARCH and machine learning.
+
+---
+
+## Limitations & Roadmap
+
+### Known Limitations
+- **Upstream Throttle Sensitivity**: Fetching financial summaries and 3-year historical bars sequentially for 35+ global tickers via `yfinance` can experience intermittent throttling or connection timeouts.
+- **Static Power BI Refresh**: The `.pbix` report requires Power BI Desktop on Windows and manual "Refresh" clicks; automated cloud scheduled refresh requires Power BI Gateway and Service licensing.
+- **Batch Refresh Cadence**: `main.py` runs on-demand; prices do not update continuously during live trading sessions.
+- **Unified Risk-Free Assumption**: Uses a single $R_f = 6.5\%$ (India 10Y Benchmark) across all assets. US equities would ideally be benchmarked against the US 10-Year Treasury (~4.2–4.5%).
+- **Unadjusted FX Returns**: Indian Rupee and US Dollar returns are evaluated in local quote currencies; currency exchange volatility is not subtracted or hedged.
+
+### Roadmap
+- [ ] **Jurisdiction-Specific Risk-Free Rates**: Implement multi-currency $R_f$ selection (e.g. 10Y US Treasury for USD equities, 10Y G-Sec for INR equities).
+- [ ] **FX-Adjusted Unified Portfolio Return**: Add currency-normalized USD and INR returns to compare cross-border performance accurately.
+- [ ] **Sector-Level Aggregation Layer**: Add rollup views for sector-wide median Sharpe, aggregate market cap, and breadth.
+- [ ] **Automated GitHub Actions Ingestion**: Schedule `main.py` via GitHub Actions on market close to commit fresh `data/heatmap_data.csv` snapshots daily.
 
 ---
 
