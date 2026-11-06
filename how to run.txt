@@ -1,0 +1,5 @@
+# Step 1 — generate the data
+python main.py
+
+# Step 2 — launch dashboard
+streamlit run dashboard_streamlit.py
